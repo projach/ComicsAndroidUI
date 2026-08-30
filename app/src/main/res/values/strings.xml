@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">ComicsTracker</string>
+    <string name="register_login_navigation_btn">login</string>
+    <string name="register_email">email</string>
+    <string name="register_username">username</string>
+    <string name="register_password">password</string>
+    <string name="register_btn">register</string>
 </resources>
