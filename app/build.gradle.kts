@@ -26,6 +26,11 @@ android {
                 enable = false
             }
         }
+        debug {
+            optimization {
+                enable = false
+            }
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -33,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
