@@ -1,6 +1,7 @@
 package com.projach.comics_tracker
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,8 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.projach.comics_tracker.domain.utils.Logger
 import com.projach.comics_tracker.ui.navigation.Screen
 import com.projach.comics_tracker.ui.navigation.navigate
+import com.projach.comics_tracker.ui.screens.authCode.AuthUserScreen
+import com.projach.comics_tracker.ui.screens.authCode.AuthUserViewModel
 import com.projach.comics_tracker.ui.screens.loginUser.LoginUserScreen
 import com.projach.comics_tracker.ui.screens.registerUser.RegisterUserScreen
 import com.projach.comics_tracker.ui.screens.registerUser.RegisterUserViewModel
@@ -41,6 +45,13 @@ class MainActivity : ComponentActivity() {
                                         navController = navController,
                                         navigationAction = action
                                     )
+                                }
+                            }
+                            LaunchedEffect(Unit) {
+                                viewModel.errorEvent.collect { error ->
+                                    Logger.d("MAIN-ACTIVITY", "error collected is $error")
+                                    Toast.makeText(this@MainActivity, error, Toast.LENGTH_SHORT)
+                                        .show()
                                 }
                             }
                             RegisterUserScreen(viewModel)

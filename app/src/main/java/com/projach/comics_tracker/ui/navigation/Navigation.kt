@@ -9,6 +9,9 @@ sealed interface Screen {
 
     @Serializable
     data class LoginUserScreen(val username: String?) : Screen
+
+    @Serializable
+    data class AuthUserScreen(val email: String) : Screen
 }
 
 sealed interface NavigationAction {

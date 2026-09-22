@@ -8,24 +8,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.projach.comics_tracker.R
 
 
 @Composable
 fun RegisterUserScreen(viewModel: RegisterUserViewModel) {
-
-    val isFormValid = viewModel.isFormValid.collectAsState()
-    val emailError = viewModel.emailError.collectAsState()
-    val passwordError = viewModel.passwordError.collectAsState()
-    val usernameError = viewModel.usernameError.collectAsState()
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
     Content(
         onRegisterClick = { username, password, email ->
@@ -36,13 +35,14 @@ fun RegisterUserScreen(viewModel: RegisterUserViewModel) {
             )
         },
         onLoginClick = { viewModel.onLoginClick() },
-        isFormValid = isFormValid.value,
+        isFormValid = viewModel.isFormValid(),
         emailState = viewModel.emailState,
         passwordState = viewModel.passwordState,
         usernameState = viewModel.usernameState,
-        emailError = emailError.value,
-        passwordError = passwordError.value,
-        usernameError = usernameError.value
+        emailError = uiState.value.emailError,
+        passwordError = uiState.value.passwordError,
+        usernameError = uiState.value.usernameError,
+        isLoading = uiState.value.isLoading
     )
 }
 
@@ -56,9 +56,26 @@ fun Content(
     passwordState: TextFieldState,
     emailError: String?,
     usernameError: String?,
-    passwordError: String?
+    passwordError: String?,
+    isLoading: Boolean
 ) {
-
+    if (isLoading) {
+        Dialog(
+            onDismissRequest = { },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+                usePlatformDefaultWidth = false
+            )
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    }
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             verticalArrangement = Arrangement.SpaceBetween,

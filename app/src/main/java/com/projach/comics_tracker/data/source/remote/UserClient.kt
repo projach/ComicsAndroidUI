@@ -4,8 +4,10 @@ import com.projach.comics_tracker.data.models.users.LoginUserDto
 import com.projach.comics_tracker.data.models.users.LoginUserResponseDto
 import com.projach.comics_tracker.data.models.users.RegisterUserDto
 import com.projach.comics_tracker.data.models.users.RegisterUserResponseDto
+import com.projach.comics_tracker.data.models.users.VerifyUserDto
 import com.projach.comics_tracker.domain.LOGIN_ENDPOINT
 import com.projach.comics_tracker.domain.REGISTER_ENDPOINT
+import com.projach.comics_tracker.domain.VERIFY_ENDPOINT
 import com.projach.comics_tracker.domain.utils.NetworkError
 import com.projach.comics_tracker.domain.utils.Result
 import io.ktor.client.HttpClient
@@ -14,6 +16,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.serialization.SerializationException
+import java.net.SocketTimeoutException
 
 class UserClient(
     private val httpClient: HttpClient
@@ -27,6 +30,36 @@ class UserClient(
             return Result.Error(NetworkError.NO_INTERNET)
         } catch (e: SerializationException) {
             return Result.Error(NetworkError.SERIALIZATION)
+        } catch (e: SocketTimeoutException) {
+            return Result.Error(NetworkError.REQUEST_TIMEOUT)
+        } catch (e: Exception) {
+            return Result.Error(NetworkError.UNKNOWN)
+        }
+
+        return when (result.status.value) {
+            in 200..299 -> {
+                Result.Success("")
+            }
+//            401 -> Result.Error(NetworkError.UNAUTHORIZED) TODO(handle this response centrally)
+            409 -> Result.Error(NetworkError.CONFLICT)
+            408 -> Result.Error(NetworkError.REQUEST_TIMEOUT)
+            413 -> Result.Error(NetworkError.PAYLOAD_TOO_LARGE)
+            in 500..599 -> Result.Error(NetworkError.SERVER_ERROR)
+            else -> Result.Error(NetworkError.UNKNOWN)
+        }
+    }
+
+    suspend fun verifyUser(user: VerifyUserDto): Result<String, NetworkError> {
+        val result = try {
+            httpClient.post(VERIFY_ENDPOINT) {
+                setBody(user)
+            }
+        } catch (e: UnresolvedAddressException) {
+            return Result.Error(NetworkError.NO_INTERNET)
+        } catch (e: SerializationException) {
+            return Result.Error(NetworkError.SERIALIZATION)
+        } catch (e: SocketTimeoutException) {
+            return Result.Error(NetworkError.REQUEST_TIMEOUT)
         } catch (e: Exception) {
             return Result.Error(NetworkError.UNKNOWN)
         }

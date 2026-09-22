@@ -5,31 +5,31 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.projach.comics_tracker.domain.useCases.UserUseCase
+import com.projach.comics_tracker.domain.utils.Logger
 import com.projach.comics_tracker.domain.utils.NetworkError
-import com.projach.comics_tracker.domain.utils.Validators
+import com.projach.comics_tracker.domain.utils.Validators.validateEmail
+import com.projach.comics_tracker.domain.utils.Validators.validatePassword
+import com.projach.comics_tracker.domain.utils.Validators.validateUsername
 import com.projach.comics_tracker.domain.utils.onError
 import com.projach.comics_tracker.domain.utils.onSuccess
 import com.projach.comics_tracker.ui.navigation.NavigationAction
 import com.projach.comics_tracker.ui.navigation.Screen
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class RegisterUserViewModel(
     private val userUseCase: UserUseCase
 ) : ViewModel() {
-    private val _registerState = MutableStateFlow<String?>("")
-    val registerState: StateFlow<String?> = _registerState
+    private val _errorEvent = MutableSharedFlow<String>()
+    val errorEvent: SharedFlow<String> = _errorEvent
 
     private val _navigationEvent = Channel<NavigationAction>(Channel.BUFFERED)
     val navigationEvent = _navigationEvent.receiveAsFlow()
@@ -38,34 +38,8 @@ class RegisterUserViewModel(
     val passwordState = TextFieldState()
     val usernameState = TextFieldState()
 
-    private val _emailError = MutableStateFlow<String?>(null)
-    val emailError: StateFlow<String?> = _emailError.asStateFlow()
-
-    private val _passwordError = MutableStateFlow<String?>(null)
-    val passwordError: StateFlow<String?> = _passwordError.asStateFlow()
-
-    private val _usernameError = MutableStateFlow<String?>(null)
-    val usernameError: StateFlow<String?> = _usernameError.asStateFlow()
-
-    private val fieldsNotEmpty: Flow<Boolean> = combine(
-        snapshotFlow { emailState.text.toString() },
-        snapshotFlow { passwordState.text.toString() },
-        snapshotFlow { usernameState.text.toString() }
-    ) { email, password, username ->
-        email.isNotEmpty() && password.isNotEmpty() && username.isNotEmpty()
-    }
-
-    private val noErrors: Flow<Boolean> = combine(
-        emailError,
-        passwordError,
-        usernameError
-    ) { emailErr, passwordErr, usernameErr ->
-        emailErr == null && passwordErr == null && usernameErr == null
-    }
-
-    val isFormValid: StateFlow<Boolean> = combine(fieldsNotEmpty, noErrors) { notEmpty, valid ->
-        notEmpty && valid
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    private val _uiState = MutableStateFlow(RegisterUserUiState())
+    val uiState: StateFlow<RegisterUserUiState> = _uiState
 
     init {
         viewModelScope.launch {
@@ -75,46 +49,62 @@ class RegisterUserViewModel(
                 snapshotFlow { usernameState.text.toString() }.map { validateUsername(it) to "username" }
             ).collect { (error, field) ->
                 when (field) {
-                    "email" -> _emailError.update {
-                        error
+                    "email" -> _uiState.update {
+                        _uiState.value.copy(emailError = error)
                     }
 
-                    "password" -> _passwordError.update {
-                        error
+                    "password" -> _uiState.update {
+                        _uiState.value.copy(passwordError = error)
                     }
 
-                    "username" -> _usernameError.update {
-                        error
+                    "username" -> _uiState.update {
+                        _uiState.value.copy(usernameError = error)
                     }
                 }
             }
         }
     }
 
+    fun isFormValid(): Boolean {
+        return emailState.text.toString().isNotEmpty()
+                && passwordState.text.toString().isNotEmpty()
+                && usernameState.text.toString().isNotEmpty()
+                && _uiState.value.emailError == null
+                && _uiState.value.passwordError == null
+                && _uiState.value.usernameError == null
+    }
+
     fun onRegisterUserClick(username: String, email: String, password: String) {
+        _uiState.update {
+            _uiState.value.copy(isLoading = true)
+        }
+
         viewModelScope.launch {
-            _navigationEvent.send(NavigationAction.NavigateTo(Screen.LoginUserScreen(null)))
             val result = userUseCase.registerUser(
                 username = username,
                 email = email,
                 password = password
             )
             result.onError { error ->
-                _registerState.update {
+                Logger.d("REGISTER-USER-VIEW-MODEL", "we have error $error")
+                _errorEvent.emit(
                     when (error) {
-                        NetworkError.REQUEST_TIMEOUT -> TODO()
-                        NetworkError.UNAUTHORIZED -> TODO()
-                        NetworkError.CONFLICT -> TODO()
-                        NetworkError.TOO_MANY_REQUESTS -> TODO()
-                        NetworkError.NO_INTERNET -> TODO()
-                        NetworkError.PAYLOAD_TOO_LARGE -> TODO()
-                        NetworkError.SERVER_ERROR -> TODO()
-                        NetworkError.SERIALIZATION -> TODO()
-                        NetworkError.UNKNOWN -> "There was an error try again"
+                        NetworkError.REQUEST_TIMEOUT -> "Please try again"
+                        NetworkError.UNAUTHORIZED -> "You are not authorized!"
+                        NetworkError.NO_INTERNET -> "You are not connected to the internet please try again"
+                        else -> "There was an error please try again"
                     }
+                )
+                _uiState.update {
+                    _uiState.value.copy(
+                        isLoading = false
+                    )
                 }
-            }.onSuccess { username ->
-                _navigationEvent.send(NavigationAction.NavigateTo(Screen.LoginUserScreen(username)))
+            }.onSuccess { _ ->
+                _uiState.update {
+                    _uiState.value.copy(isLoading = false)
+                }
+                _navigationEvent.send(NavigationAction.NavigateTo(Screen.AuthUserScreen(email)))
             }
         }
     }
@@ -123,23 +113,5 @@ class RegisterUserViewModel(
         viewModelScope.launch {
             _navigationEvent.send(NavigationAction.NavigateTo(Screen.LoginUserScreen(null)))
         }
-    }
-
-    private fun validateEmail(email: String): String? = when {
-        email.isEmpty() -> null
-        !Validators.isValidEmail(email) -> "Enter a valid email"
-        else -> null
-    }
-
-    private fun validateUsername(username: String): String? = when {
-        username.isEmpty() -> null
-        username.length !in 4..14 -> "Username needs to be 4 to 14 characters"
-        else -> null
-    }
-
-    private fun validatePassword(password: String): String? = when {
-        password.isEmpty() -> null
-        password.length < 8 -> "Password needs more than 8 characters"
-        else -> null
     }
 }
