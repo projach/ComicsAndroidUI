@@ -16,8 +16,6 @@ import androidx.navigation.compose.rememberNavController
 import com.projach.comics_tracker.domain.utils.Logger
 import com.projach.comics_tracker.ui.navigation.Screen
 import com.projach.comics_tracker.ui.navigation.navigate
-import com.projach.comics_tracker.ui.screens.authCode.AuthUserScreen
-import com.projach.comics_tracker.ui.screens.authCode.AuthUserViewModel
 import com.projach.comics_tracker.ui.screens.loginUser.LoginUserScreen
 import com.projach.comics_tracker.ui.screens.registerUser.RegisterUserScreen
 import com.projach.comics_tracker.ui.screens.registerUser.RegisterUserViewModel
