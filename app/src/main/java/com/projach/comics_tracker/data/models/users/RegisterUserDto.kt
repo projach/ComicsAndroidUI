@@ -4,17 +4,27 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class VerifyUserDto(
+    val email: String,
+    val code: String
+)
+
+@Serializable
 data class RegisterUserDto(
     val username: String,
     val password: String,
     val email: String
 )
 
-
 @Serializable
 data class LoginUserDto(
     val username: String,
     val password: String
+)
+
+@Serializable
+data class ResendCodeDto(
+    val email: String
 )
 
 @Serializable

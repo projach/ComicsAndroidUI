@@ -5,4 +5,6 @@
     <string name="register_username">username</string>
     <string name="register_password">password</string>
     <string name="register_btn">register</string>
+    <string name="auth_info">Add your six-digit code here</string>
+    <string name="resend_otp_code">Resend code</string>
 </resources>

@@ -89,9 +89,9 @@ class RegisterUserViewModel(
                 Logger.d("REGISTER-USER-VIEW-MODEL", "we have error $error")
                 _errorEvent.emit(
                     when (error) {
-                        NetworkError.REQUEST_TIMEOUT -> "Please try again"
-                        NetworkError.UNAUTHORIZED -> "You are not authorized!"
-                        NetworkError.NO_INTERNET -> "You are not connected to the internet please try again"
+                        NetworkError.RequestTimeout -> "Please try again"
+                        NetworkError.Unauthorized -> "You are not authorized!"
+                        NetworkError.NoInternet -> "You are not connected to the internet please try again"
                         else -> "There was an error please try again"
                     }
                 )
@@ -104,7 +104,14 @@ class RegisterUserViewModel(
                 _uiState.update {
                     _uiState.value.copy(isLoading = false)
                 }
-                _navigationEvent.send(NavigationAction.NavigateTo(Screen.AuthUserScreen(email)))
+                _navigationEvent.send(
+                    NavigationAction.NavigateTo(
+                        Screen.AuthUserScreen(
+                            email = email,
+                            username = username
+                        )
+                    )
+                )
             }
         }
     }

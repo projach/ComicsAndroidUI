@@ -8,10 +8,10 @@ sealed interface Screen {
     object RegisterUserScreen : Screen
 
     @Serializable
-    data class LoginUserScreen(val username: String?) : Screen
+    data class LoginUserScreen(val username: String? = null) : Screen
 
     @Serializable
-    data class AuthUserScreen(val email: String) : Screen
+    data class AuthUserScreen(val email: String, val username: String) : Screen
 }
 
 sealed interface NavigationAction {

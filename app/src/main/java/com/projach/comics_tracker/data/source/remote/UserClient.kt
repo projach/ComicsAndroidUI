@@ -4,9 +4,11 @@ import com.projach.comics_tracker.data.models.users.LoginUserDto
 import com.projach.comics_tracker.data.models.users.LoginUserResponseDto
 import com.projach.comics_tracker.data.models.users.RegisterUserDto
 import com.projach.comics_tracker.data.models.users.RegisterUserResponseDto
+import com.projach.comics_tracker.data.models.users.ResendCodeDto
 import com.projach.comics_tracker.data.models.users.VerifyUserDto
 import com.projach.comics_tracker.domain.LOGIN_ENDPOINT
 import com.projach.comics_tracker.domain.REGISTER_ENDPOINT
+import com.projach.comics_tracker.domain.RESEND_CODE_ENDPOINT
 import com.projach.comics_tracker.domain.VERIFY_ENDPOINT
 import com.projach.comics_tracker.domain.utils.NetworkError
 import com.projach.comics_tracker.domain.utils.Result
@@ -27,25 +29,24 @@ class UserClient(
                 setBody(user)
             }
         } catch (e: UnresolvedAddressException) {
-            return Result.Error(NetworkError.NO_INTERNET)
+            return Result.Error(NetworkError.NoInternet)
         } catch (e: SerializationException) {
-            return Result.Error(NetworkError.SERIALIZATION)
+            return Result.Error(NetworkError.Serialization)
         } catch (e: SocketTimeoutException) {
-            return Result.Error(NetworkError.REQUEST_TIMEOUT)
+            return Result.Error(NetworkError.RequestTimeout)
         } catch (e: Exception) {
-            return Result.Error(NetworkError.UNKNOWN)
+            return Result.Error(NetworkError.Unknown)
         }
 
         return when (result.status.value) {
             in 200..299 -> {
                 Result.Success("")
             }
-//            401 -> Result.Error(NetworkError.UNAUTHORIZED) TODO(handle this response centrally)
-            409 -> Result.Error(NetworkError.CONFLICT)
-            408 -> Result.Error(NetworkError.REQUEST_TIMEOUT)
-            413 -> Result.Error(NetworkError.PAYLOAD_TOO_LARGE)
-            in 500..599 -> Result.Error(NetworkError.SERVER_ERROR)
-            else -> Result.Error(NetworkError.UNKNOWN)
+//            401 -> Result.Error(NetworkError.Unathorized) TODO(handle this response centrally)
+            409 -> Result.Error(NetworkError.Conflict)
+            408 -> Result.Error(NetworkError.RequestTimeout)
+            in 500..599 -> Result.Error(NetworkError.ServerError)
+            else -> Result.Error(NetworkError.Unknown)
         }
     }
 
@@ -55,13 +56,13 @@ class UserClient(
                 setBody(user)
             }
         } catch (e: UnresolvedAddressException) {
-            return Result.Error(NetworkError.NO_INTERNET)
+            return Result.Error(NetworkError.NoInternet)
         } catch (e: SerializationException) {
-            return Result.Error(NetworkError.SERIALIZATION)
+            return Result.Error(NetworkError.Serialization)
         } catch (e: SocketTimeoutException) {
-            return Result.Error(NetworkError.REQUEST_TIMEOUT)
+            return Result.Error(NetworkError.RequestTimeout)
         } catch (e: Exception) {
-            return Result.Error(NetworkError.UNKNOWN)
+            return Result.Error(NetworkError.Unknown)
         }
 
         return when (result.status.value) {
@@ -69,12 +70,38 @@ class UserClient(
                 val user = result.body<RegisterUserResponseDto>()
                 Result.Success(user.username)
             }
-//            401 -> Result.Error(NetworkError.UNAUTHORIZED) TODO(handle this response centrally)
-            409 -> Result.Error(NetworkError.CONFLICT)
-            408 -> Result.Error(NetworkError.REQUEST_TIMEOUT)
-            413 -> Result.Error(NetworkError.PAYLOAD_TOO_LARGE)
-            in 500..599 -> Result.Error(NetworkError.SERVER_ERROR)
-            else -> Result.Error(NetworkError.UNKNOWN)
+//            401 -> Result.Error(NetworkError.Unathorized) TODO(handle this response centrally)
+            409 -> Result.Error(NetworkError.Conflict)
+            408 -> Result.Error(NetworkError.RequestTimeout)
+            429 -> {
+                Result.Error(NetworkError.OtpTimeout)
+            }
+
+            in 500..599 -> Result.Error(NetworkError.ServerError)
+            else -> Result.Error(NetworkError.Unknown)
+        }
+    }
+
+    suspend fun resendCode(email: ResendCodeDto): Result<String, NetworkError> {
+        val result = try {
+            httpClient.post(RESEND_CODE_ENDPOINT) {
+                setBody(email)
+            }
+        } catch (e: UnresolvedAddressException) {
+            return Result.Error(NetworkError.NoInternet)
+        } catch (e: SerializationException) {
+            return Result.Error(NetworkError.Serialization)
+        }
+
+        return when (result.status.value) {
+            in 200..299 -> {
+                Result.Success("")
+            }
+//            401 -> Result.Error(NetworkError.Unathorized) TODO(handle this response centrally)
+            409 -> Result.Error(NetworkError.Conflict)
+            408 -> Result.Error(NetworkError.RequestTimeout)
+            in 500..599 -> Result.Error(NetworkError.ServerError)
+            else -> Result.Error(NetworkError.Unknown)
         }
     }
 
@@ -84,9 +111,9 @@ class UserClient(
                 setBody(user)
             }
         } catch (e: UnresolvedAddressException) {
-            return Result.Error(NetworkError.NO_INTERNET)
+            return Result.Error(NetworkError.NoInternet)
         } catch (e: SerializationException) {
-            return Result.Error(NetworkError.SERIALIZATION)
+            return Result.Error(NetworkError.Serialization)
         }
 
         return when (result.status.value) {
@@ -94,12 +121,11 @@ class UserClient(
                 val user = result.body<LoginUserResponseDto>()
                 Result.Success(user)
             }
-//            401 -> Result.Error(NetworkError.UNAUTHORIZED) TODO(handle this response centrally)
-            409 -> Result.Error(NetworkError.CONFLICT)
-            408 -> Result.Error(NetworkError.REQUEST_TIMEOUT)
-            413 -> Result.Error(NetworkError.PAYLOAD_TOO_LARGE)
-            in 500..599 -> Result.Error(NetworkError.SERVER_ERROR)
-            else -> Result.Error(NetworkError.UNKNOWN)
+//            401 -> Result.Error(NetworkError.Unathorized) TODO(handle this response centrally)
+            409 -> Result.Error(NetworkError.Conflict)
+            408 -> Result.Error(NetworkError.RequestTimeout)
+            in 500..599 -> Result.Error(NetworkError.ServerError)
+            else -> Result.Error(NetworkError.Unknown)
         }
     }
 }
