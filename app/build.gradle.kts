@@ -38,6 +38,9 @@ android {
         compose = true
         buildConfig = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -69,4 +72,8 @@ dependencies {
 
     //http interceptor
     implementation(libs.logging.interceptor)
+
+    //tests
+    testImplementation(libs.mockwebserver)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
