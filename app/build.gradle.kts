@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.converter.gson)
 
     //di
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
@@ -76,4 +77,7 @@ dependencies {
     //tests
     testImplementation(libs.mockwebserver)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    //navigation
+    implementation(libs.navigation.compose)
 }

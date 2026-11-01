@@ -1,4 +1,4 @@
-package com.projach.comics_tracker.data.source.remote.network
+package com.projach.comics_tracker.data.di
 
 import com.projach.comics_tracker.BuildConfig
 import com.projach.comics_tracker.data.source.remote.apis.AuthApi

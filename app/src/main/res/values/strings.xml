@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">ComicsTracker</string>
+    <string name="register_user_create_account_label">Create an account</string>
+    <string name="register_user_username">Username</string>
+    <string name="register_user_username_hint">Choose a username</string>
+    <string name="register_user_email">Email address</string>
+    <string name="register_user_email_hint">you@example.com</string>
+    <string name="register_user_password">Password</string>
+    <string name="register_user_password_hint">At least 8 characters</string>
+    <string name="register_user_submit">Submit</string>
 </resources>
