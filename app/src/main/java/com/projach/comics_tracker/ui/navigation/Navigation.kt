@@ -9,6 +9,9 @@ sealed interface Screen {
     object RegisterUserScreen : Screen
 
     @Serializable
+    data class OtpScreen(val email: String) : Screen
+
+    @Serializable
     data class LoginUserScreen(val username: String? = null) : Screen
 }
 

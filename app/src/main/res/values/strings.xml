@@ -8,4 +8,10 @@
     <string name="register_user_password">Password</string>
     <string name="register_user_password_hint">At least 8 characters</string>
     <string name="register_user_submit">Submit</string>
+    <string name="register_user_email_error">Enter a valid Email</string>
+    <string name="register_user_username_contains_whitespace">Username cannot contain whitespaces</string>
+    <string name="register_user_username_is_too_long">Username cannot be more than 14 characters</string>
+    <string name="register_user_username_is_too_short">Username cannot be less than 4 characters</string>
+    <string name="register_user_password_contains_whitespace">Password cannot contain whitespaces</string>
+    <string name="register_user_password_is_too_short">Password cannot be less than 8 characters</string>
 </resources>

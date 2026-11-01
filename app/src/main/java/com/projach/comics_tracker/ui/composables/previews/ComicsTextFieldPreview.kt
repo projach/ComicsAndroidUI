@@ -17,7 +17,7 @@ fun ComicsTextFieldPreview(){
             label = stringResource(R.string.register_user_email),
             hint = stringResource(R.string.register_user_email_hint),
             text = "",
-            onTextChanged = {},
+            onValueChanged = {},
         ),
         keyboardOptions = KeyboardOptions(),
         keyboardActions = KeyboardActions()
