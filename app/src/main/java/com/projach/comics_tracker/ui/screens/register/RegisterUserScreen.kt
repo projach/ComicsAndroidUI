@@ -1,13 +1,17 @@
 package com.projach.comics_tracker.ui.screens.register
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -83,55 +87,70 @@ fun Content(
             }
         }
     }
-    Column(modifier = Modifier
-        .padding(horizontal = 12.dp, vertical = 20.dp)
-        .imePadding()) {
-        Text(
-            text = stringResource(R.string.register_user_create_account_label),
-            style = Typography.titleLarge
-        )
-        Spacer(Modifier.height(24.dp))
-        UserForm(
-            listOf(
-                ComicsTestFieldUiModel(
-                    text = usernameText,
-                    label = stringResource(R.string.register_user_username),
-                    hint = stringResource(R.string.register_user_username_hint),
-                    error = usernameError?.toStringRes()?.let { stringResource(it) },
-                    onValueChanged = onUsernameChanged,
-                    fieldType = FieldType.Text
-                ),
-                ComicsTestFieldUiModel(
-                    text = emailText,
-                    label = stringResource(R.string.register_user_email),
-                    hint = stringResource(R.string.register_user_email_hint),
-                    error = emailError?.toStringRes()?.let { stringResource(it) },
-                    onValueChanged = onEmailChanged,
-                    fieldType = FieldType.Email
-                ),
-                ComicsTestFieldUiModel(
-                    text = passwordText,
-                    label = stringResource(R.string.register_user_password),
-                    hint = stringResource(R.string.register_user_password_hint),
-                    error = passwordError?.toStringRes()?.let { stringResource(it) },
-                    onValueChanged = onPasswordChanged,
-                    fieldType = FieldType.Password
-                )
-            ),
-            onSubmit = onSubmit
-        )
-        Spacer(Modifier.weight(1f))
-        Button(
-            onClick = {
-                onSubmit.invoke()
-                focusManager.clearFocus()
-            },
-            enabled = canSubmit,
+
+
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()){
+        val minHeight = maxHeight
+
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .padding(horizontal = 12.dp, vertical = 20.dp)
+                .heightIn(min = minHeight - 40.dp)
         ) {
-            Text(stringResource(R.string.register_user_submit))
+            Text(
+                text = stringResource(R.string.register_user_create_account_label),
+                style = Typography.titleLarge
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            UserForm(
+                listOf(
+                    ComicsTestFieldUiModel(
+                        text = usernameText,
+                        label = stringResource(R.string.register_user_username),
+                        hint = stringResource(R.string.register_user_username_hint),
+                        error = usernameError?.toStringRes()?.let { stringResource(it) },
+                        onValueChanged = onUsernameChanged,
+                        fieldType = FieldType.Text
+                    ),
+                    ComicsTestFieldUiModel(
+                        text = emailText,
+                        label = stringResource(R.string.register_user_email),
+                        hint = stringResource(R.string.register_user_email_hint),
+                        error = emailError?.toStringRes()?.let { stringResource(it) },
+                        onValueChanged = onEmailChanged,
+                        fieldType = FieldType.Email
+                    ),
+                    ComicsTestFieldUiModel(
+                        text = passwordText,
+                        label = stringResource(R.string.register_user_password),
+                        hint = stringResource(R.string.register_user_password_hint),
+                        error = passwordError?.toStringRes()?.let { stringResource(it) },
+                        onValueChanged = onPasswordChanged,
+                        fieldType = FieldType.Password
+                    )
+                ),
+                onSubmit = onSubmit
+            )
+
+            Spacer(Modifier.weight(1f))
+
+            Button(
+                onClick = {
+                    onSubmit.invoke()
+                    focusManager.clearFocus()
+                },
+                enabled = canSubmit,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+            ) {
+                Text(stringResource(R.string.register_user_submit))
+            }
         }
     }
 }
