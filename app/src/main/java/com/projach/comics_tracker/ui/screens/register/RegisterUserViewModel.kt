@@ -73,73 +73,81 @@ class RegisterUserViewModel @Inject constructor(
             }
 
             RegisterUserIntent.Submit -> {
-                if (_uiState.value.formIsValid) {
-                    _uiState.update {
-                        it.copy(isLoading = true)
+                submitForm()
+            }
+        }
+    }
+
+    private fun submitForm(){
+        if (_uiState.value.formIsValid) {
+            _uiState.update {
+                it.copy(isLoading = true)
+            }
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.register(
+                    email = _uiState.value.email,
+                    password = _uiState.value.password,
+                    username = _uiState.value.username
+                ).onSuccess {
+                    Logger.d(
+                        "RegisterUserViewModel",
+                        "Successful register navigating to login screen"
+                    )
+                    _effect.send(
+                        RegisterEffect.Navigate(
+                            NavigationAction.NavigateToAndClearBackStack(
+                                Screen.OtpScreen(
+                                    email = _uiState.value.email
+                                )
+                            )
+                        )
+                    )
+                }.onError { error ->
+                    Logger.e("RegisterUserViewModel", "Error on register with error $error")
+                    _uiState.update { it.copy(isLoading = false) }
+                    handleResponseErrors(error)
+                }
+            }
+        }
+    }
+
+    private suspend fun handleResponseErrors(error: DataError){
+        when (error) {
+            is DataError.Conflict -> {
+                when {
+                    error.message.lowercase()
+                        .contains("email") -> _uiState.update {
+                        it.copy(emailError = EmailValidationError.Conflict)
                     }
-                    viewModelScope.launch(Dispatchers.IO) {
-                        repository.register(
-                            email = _uiState.value.email,
-                            password = _uiState.value.password,
-                            username = _uiState.value.username
-                        ).onSuccess {
-                            Logger.d(
-                                "RegisterUserViewModel",
-                                "Successful register navigating to login screen"
-                            )
-                            _effect.send(
-                                RegisterEffect.Navigate(
-                                    NavigationAction.NavigateTo(
-                                        Screen.OtpScreen(
-                                            email = _uiState.value.email
-                                        )
-                                    )
-                                )
-                            )
-                        }.onError { error ->
-                            Logger.e("RegisterUserViewModel", "Error on register with error $error")
-                            _uiState.update { it.copy(isLoading = false) }
-                            when (error) {
-                                is DataError.Conflict -> {
-                                    when {
-                                        error.message.lowercase()
-                                            .contains("email") -> _uiState.update {
-                                            it.copy(emailError = EmailValidationError.Conflict)
-                                        }
 
-                                        error.message.lowercase()
-                                            .contains("username") -> _uiState.update {
-                                            it.copy(emailError = EmailValidationError.Conflict)
-                                        }
+                    error.message.lowercase()
+                        .contains("username") -> _uiState.update {
+                        it.copy(emailError = EmailValidationError.Conflict)
+                    }
 
-                                        else -> {
-                                            _effect.send(RegisterEffect.ShowError("Email or Username already exists"))
-                                        }
-                                    }
-                                }
-
-                                DataError.Network, DataError.NoInternet, DataError.Timeout -> _effect.send(
-                                    RegisterEffect.ShowError("There is a connection issue please try again")
-                                )
-
-                                is DataError.TooManyRequests -> _effect.send(
-                                    RegisterEffect.ShowError(
-                                        "You need to wait for ${error.retryAfterRemainingSeconds} to try again with this email/username"
-                                    )
-                                )
-
-                                is DataError.Unknown -> {
-                                    Logger.e("RegisterUserViewModel", "Unknown error in register call ${error.cause}")
-                                    _effect.send(
-                                        RegisterEffect.ShowError(
-                                            "There was an error please try again!"
-                                        )
-                                    )
-                                }
-                            }
-                        }
+                    else -> {
+                        _effect.send(RegisterEffect.ShowError("Email or Username already exists"))
                     }
                 }
+            }
+
+            DataError.Network, DataError.NoInternet, DataError.Timeout -> _effect.send(
+                RegisterEffect.ShowError("There is a connection issue please try again")
+            )
+
+            is DataError.TooManyRequests -> _effect.send(
+                RegisterEffect.ShowError(
+                    "You need to wait for ${error.retryAfterRemainingSeconds} to try again with this email/username"
+                )
+            )
+
+            is DataError.Unknown -> {
+                Logger.e("RegisterUserViewModel", "Unknown error in register call ${error.cause}")
+                _effect.send(
+                    RegisterEffect.ShowError(
+                        "There was an error please try again!"
+                    )
+                )
             }
         }
     }
