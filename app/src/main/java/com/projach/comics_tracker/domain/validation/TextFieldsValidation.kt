@@ -1,38 +1,30 @@
 package com.projach.comics_tracker.domain.validation
 
-import com.projach.comics_tracker.domain.PASSWORD_MIN_LENGTH
-import com.projach.comics_tracker.domain.USERNAME_MAX_LENGTH
-import com.projach.comics_tracker.domain.USERNAME_MIN_LENGTH
-
-enum class ValidationError {
-    EMPTY,
-    CONTAINS_WHITESPACE,
-    INVALID_EMAIL,
-    TOO_SHORT,
-    TOO_LONG
-}
+const val USERNAME_MIN_LENGTH = 4
+const val USERNAME_MAX_LENGTH = 14
+const val PASSWORD_MIN_LENGTH = 8
 
 private val EMAIL_REGEX = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*\\.[A-Za-z]{2,}$")
 private fun String.hasWhitespace() = any { it.isWhitespace() }
 
-fun validateEmail(input: String): ValidationError? = when {
-    input.isEmpty() -> ValidationError.EMPTY
-    input.hasWhitespace() -> ValidationError.CONTAINS_WHITESPACE
-    !EMAIL_REGEX.matches(input) -> ValidationError.INVALID_EMAIL
+fun validateEmail(input: String): EmailValidationError? = when {
+    input.isEmpty() -> EmailValidationError.Common(CommonValidationError.Empty)
+    input.hasWhitespace() -> EmailValidationError.Common(CommonValidationError.ContainsWhitespaces)
+    !EMAIL_REGEX.matches(input) -> EmailValidationError.InvalidEmail
     else -> null
 }
 
-fun validateUsername(input: String): ValidationError? = when {
-    input.isEmpty() -> ValidationError.EMPTY
-    input.hasWhitespace() -> ValidationError.CONTAINS_WHITESPACE
-    input.length < USERNAME_MIN_LENGTH -> ValidationError.TOO_SHORT
-    input.length > USERNAME_MAX_LENGTH -> ValidationError.TOO_LONG
+fun validateUsername(input: String): UsernameValidationError? = when {
+    input.isEmpty() -> UsernameValidationError.Common(CommonValidationError.Empty)
+    input.hasWhitespace() -> UsernameValidationError.Common(CommonValidationError.ContainsWhitespaces)
+    input.length < USERNAME_MIN_LENGTH -> UsernameValidationError.TooShort
+    input.length > USERNAME_MAX_LENGTH -> UsernameValidationError.TooLong
     else -> null
 }
 
-fun validatePassword(input: String): ValidationError? = when {
-    input.isEmpty() -> ValidationError.EMPTY
-    input.hasWhitespace() -> ValidationError.CONTAINS_WHITESPACE
-    input.length < PASSWORD_MIN_LENGTH -> ValidationError.TOO_SHORT
+fun validatePassword(input: String): PasswordValidationError? = when {
+    input.isEmpty() -> PasswordValidationError.Common(CommonValidationError.Empty)
+    input.hasWhitespace() -> PasswordValidationError.Common(CommonValidationError.ContainsWhitespaces)
+    input.length < PASSWORD_MIN_LENGTH -> PasswordValidationError.TooShort
     else -> null
 }

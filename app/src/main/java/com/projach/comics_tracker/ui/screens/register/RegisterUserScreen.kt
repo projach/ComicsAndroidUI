@@ -14,17 +14,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.projach.comics_tracker.R
-import com.projach.comics_tracker.domain.validation.ValidationError
+import com.projach.comics_tracker.domain.validation.EmailValidationError
+import com.projach.comics_tracker.domain.validation.PasswordValidationError
+import com.projach.comics_tracker.domain.validation.UsernameValidationError
 import com.projach.comics_tracker.ui.composables.UserForm
 import com.projach.comics_tracker.ui.composables.models.ComicsTestFieldUiModel
 import com.projach.comics_tracker.ui.composables.models.FieldType
 import com.projach.comics_tracker.ui.theme.Typography
+import com.projach.comics_tracker.ui.validation.toStringRes
 
 @Composable
 fun RegisterUserScreen(viewModel: RegisterUserViewModel) {
@@ -50,17 +54,18 @@ fun RegisterUserScreen(viewModel: RegisterUserViewModel) {
 fun Content(
     emailText: String,
     onEmailChanged: (String) -> Unit,
-    emailError: ValidationError?,
+    emailError: EmailValidationError?,
     usernameText: String,
     onUsernameChanged: (String) -> Unit,
-    usernameError: ValidationError?,
+    usernameError: UsernameValidationError?,
     passwordText: String,
     onPasswordChanged: (String) -> Unit,
-    passwordError: ValidationError?,
+    passwordError: PasswordValidationError?,
     canSubmit: Boolean,
     isLoading: Boolean,
     onSubmit: () -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     if (isLoading) {
         Dialog(
             onDismissRequest = { },
@@ -92,14 +97,7 @@ fun Content(
                     text = usernameText,
                     label = stringResource(R.string.register_user_username),
                     hint = stringResource(R.string.register_user_username_hint),
-                    error = when (usernameError) {
-                        ValidationError.CONTAINS_WHITESPACE -> stringResource(R.string.register_user_username_contains_whitespace)
-                        ValidationError.TOO_LONG -> stringResource(R.string.register_user_username_is_too_long)
-                        ValidationError.TOO_SHORT -> if (usernameText.isNotEmpty()) stringResource(R.string.register_user_username_is_too_short) else null
-                        ValidationError.EMPTY -> null
-                        ValidationError.INVALID_EMAIL -> null
-                        null -> null
-                    },
+                    error = usernameError?.toStringRes()?.let { stringResource(it) },
                     onValueChanged = onUsernameChanged,
                     fieldType = FieldType.Text
                 ),
@@ -107,14 +105,7 @@ fun Content(
                     text = emailText,
                     label = stringResource(R.string.register_user_email),
                     hint = stringResource(R.string.register_user_email_hint),
-                    error = when (emailError) {
-                        ValidationError.CONTAINS_WHITESPACE -> stringResource(R.string.register_user_email_error)
-                        ValidationError.TOO_LONG -> null
-                        ValidationError.TOO_SHORT -> null
-                        ValidationError.EMPTY -> null
-                        ValidationError.INVALID_EMAIL -> stringResource(R.string.register_user_email_error)
-                        null -> null
-                    },
+                    error = emailError?.toStringRes()?.let { stringResource(it) },
                     onValueChanged = onEmailChanged,
                     fieldType = FieldType.Email
                 ),
@@ -122,14 +113,7 @@ fun Content(
                     text = passwordText,
                     label = stringResource(R.string.register_user_password),
                     hint = stringResource(R.string.register_user_password_hint),
-                    error = when (passwordError) {
-                        ValidationError.CONTAINS_WHITESPACE -> stringResource(R.string.register_user_password_contains_whitespace)
-                        ValidationError.TOO_LONG -> null
-                        ValidationError.TOO_SHORT -> if (usernameText.isNotEmpty()) stringResource(R.string.register_user_password_is_too_short) else null
-                        ValidationError.EMPTY -> null
-                        ValidationError.INVALID_EMAIL -> null
-                        null -> null
-                    },
+                    error = passwordError?.toStringRes()?.let { stringResource(it) },
                     onValueChanged = onPasswordChanged,
                     fieldType = FieldType.Password
                 )
@@ -138,7 +122,10 @@ fun Content(
         )
         Spacer(Modifier.weight(1f))
         Button(
-            onClick = onSubmit,
+            onClick = {
+                onSubmit.invoke()
+                focusManager.clearFocus()
+            },
             enabled = canSubmit,
             modifier = Modifier
                 .fillMaxWidth()
