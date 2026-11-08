@@ -2,8 +2,9 @@ package com.projach.comics_tracker.data.repository
 
 import com.projach.comics_tracker.data.source.remote.apis.AuthApi
 import com.projach.comics_tracker.domain.REGISTER
-import com.projach.comics_tracker.domain.dataResult.DataError
 import com.projach.comics_tracker.domain.dataResult.DataResult
+import com.projach.comics_tracker.domain.dataResult.NetworkUserDataError
+import com.projach.comics_tracker.domain.dataResult.TooManyRequests
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.runTest
@@ -68,7 +69,7 @@ class AuthRepositoryImplTest {
 
         val result = repository.register(email = "a@b.com", username = "alice", password = "secret123")
 
-        assertEquals(DataResult.Failure(DataError.TooManyRequests(60)), result)
+        assertEquals(DataResult.Failure(TooManyRequests(60)), result)
     }
 
     @Test
@@ -81,7 +82,7 @@ class AuthRepositoryImplTest {
 
         val result = timeoutRepository.register(email = "a@b.com", username = "alice", password = "secret123")
 
-        assertEquals(DataResult.Failure(DataError.Timeout), result)
+        assertEquals(DataResult.Failure(NetworkUserDataError.Timeout), result)
     }
 
     @Test
@@ -90,6 +91,6 @@ class AuthRepositoryImplTest {
 
         val result = repository.register(email = "a@b.com", username = "alice", password = "secret123")
 
-        assertEquals(DataResult.Failure(DataError.Network), result)
+        assertEquals(DataResult.Failure(NetworkUserDataError.NoInternet), result)
     }
 }

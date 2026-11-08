@@ -1,49 +1,90 @@
 package com.projach.comics_tracker.data.repository
 
-import com.projach.comics_tracker.core.Logger
+import com.projach.comics_tracker.data.model.RefreshOtpResponseDto
+import com.projach.comics_tracker.data.model.ResendOtpRequestDto
 import com.projach.comics_tracker.data.model.SignUpRequestDto
+import com.projach.comics_tracker.data.model.UserDto
+import com.projach.comics_tracker.data.model.VerifyRequestDto
 import com.projach.comics_tracker.data.source.remote.apis.AuthApi
-import com.projach.comics_tracker.data.source.remote.network.toDataResult
-import com.projach.comics_tracker.domain.dataResult.DataError
+import com.projach.comics_tracker.data.source.remote.safeApiCall
+import com.projach.comics_tracker.domain.dataResult.Conflict
 import com.projach.comics_tracker.domain.dataResult.DataResult
+import com.projach.comics_tracker.domain.dataResult.InvalidOrExpiredCode
+import com.projach.comics_tracker.domain.dataResult.NotFound
+import com.projach.comics_tracker.domain.dataResult.RefreshOtpCodeDataError
+import com.projach.comics_tracker.domain.dataResult.RegisterUserDataError
+import com.projach.comics_tracker.domain.dataResult.TooManyRequests
+import com.projach.comics_tracker.domain.dataResult.VerifyOtpDataError
 import com.projach.comics_tracker.domain.repository.AuthRepository
-import kotlinx.serialization.SerializationException
-import okio.IOException
-import java.net.ConnectException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi
-): AuthRepository {
+) : AuthRepository {
     override suspend fun register(
         email: String,
         password: String,
         username: String
-    ): DataResult<Unit, DataError> =
-        try {
-            authApi.registerUser(
-                SignUpRequestDto(
-                    username = username,
-                    password = password,
-                    email = email
+    ): DataResult<Unit, RegisterUserDataError> =
+        safeApiCall(
+            commonError = { it },
+            httpError = { code, message, headers ->
+                when (code) {
+                    409 -> Conflict(message)
+                    429 -> TooManyRequests(headers["Retry-After"]?.toIntOrNull())
+                    else -> null
+                }
+            },
+            call = {
+                authApi.registerUser(
+                    SignUpRequestDto(
+                        username = username,
+                        password = password,
+                        email = email
+                    )
                 )
-            ).toDataResult()
-        } catch (e: SocketTimeoutException) {
-            Logger.e("UsersRepositoryImpl", "error $e")
-            DataResult.Failure(DataError.Timeout)
-        } catch (e: UnknownHostException) {
-            Logger.e("UsersRepositoryImpl", "error $e")
-            DataResult.Failure(DataError.NoInternet)
-        } catch (e: ConnectException) {
-            Logger.e("UsersRepositoryImpl", "error $e")
-            DataResult.Failure(DataError.NoInternet)
-        } catch (e: IOException) {
-            Logger.e("UsersRepositoryImpl", "error $e")
-            DataResult.Failure(DataError.Network)
-        } catch (e: SerializationException) {
-            Logger.e("UsersRepositoryImpl", "error $e")
-            DataResult.Failure(DataError.Unknown(e.message ?: ""))
-        }
+            }
+        )
+
+    override suspend fun verify(
+        email: String,
+        code: String
+    ): DataResult<UserDto, VerifyOtpDataError> =
+        safeApiCall(
+            commonError = { it },
+            httpError = { code, message, _ ->
+                when (code) {
+                    409 -> Conflict(message)
+                    400 -> InvalidOrExpiredCode
+                    else -> null
+                }
+            },
+            call = {
+                authApi.verifyUser(
+                    VerifyRequestDto(
+                        email = email,
+                        code = code
+                    )
+                )
+            }
+        )
+
+    override suspend fun refreshOtp(email: String): DataResult<RefreshOtpResponseDto, RefreshOtpCodeDataError> =
+        safeApiCall(
+            commonError = { it },
+            httpError = { code, _, headers ->
+                when (code) {
+                    404 -> NotFound
+                    429 -> TooManyRequests(headers["Retry-After"]?.toIntOrNull())
+                    else -> null
+                }
+            },
+            call = {
+                authApi.resendOtp(
+                    ResendOtpRequestDto(
+                        email = email
+                    )
+                )
+            }
+        )
 }

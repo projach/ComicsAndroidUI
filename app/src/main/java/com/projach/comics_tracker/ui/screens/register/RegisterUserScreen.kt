@@ -1,6 +1,5 @@
 package com.projach.comics_tracker.ui.screens.register
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,13 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.projach.comics_tracker.R
 import com.projach.comics_tracker.domain.validation.EmailValidationError
 import com.projach.comics_tracker.domain.validation.PasswordValidationError
 import com.projach.comics_tracker.domain.validation.UsernameValidationError
+import com.projach.comics_tracker.ui.composables.Loader
 import com.projach.comics_tracker.ui.composables.UserForm
 import com.projach.comics_tracker.ui.composables.models.ComicsTestFieldUiModel
 import com.projach.comics_tracker.ui.composables.models.FieldType
@@ -77,24 +74,8 @@ fun Content(
     onGoToLogin: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    if (isLoading) {
-        Dialog(
-            onDismissRequest = { },
-            properties = DialogProperties(
-                dismissOnBackPress = false,
-                dismissOnClickOutside = false,
-                usePlatformDefaultWidth = false
-            )
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-    }
 
+    Loader(isLoading)
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val minHeight = maxHeight

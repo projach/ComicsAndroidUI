@@ -6,9 +6,17 @@ import org.junit.Test
 
 class UsernameValidatorTest {
     @Test
-    fun `too short`() = assertEquals(ValidationError.TOO_SHORT, validateUsername("abc"))
-    @Test fun `too long`() = assertEquals(ValidationError.TOO_LONG, validateUsername("a".repeat(15)))
-    @Test fun `has space`() = assertEquals(ValidationError.CONTAINS_WHITESPACE, validateUsername("ab cd"))
+    fun `too short`() = assertEquals(UsernameValidationError.TooShort, validateUsername("abc"))
+
+    @Test
+    fun `too long`() =
+        assertEquals(UsernameValidationError.TooLong, validateUsername("a".repeat(15)))
+
+    @Test
+    fun `has space`() = assertEquals(
+        UsernameValidationError.Common(CommonValidationError.ContainsWhitespaces),
+        validateUsername("ab cd")
+    )
     @Test fun `valid boundaries`() {
         assertNull(validateUsername("abcd"))
         assertNull(validateUsername("a".repeat(14)))
@@ -17,8 +25,13 @@ class UsernameValidatorTest {
 
 class PasswordValidatorTest {
     @Test
-    fun `too short`() = assertEquals(ValidationError.TOO_SHORT, validatePassword("abc"))
-    @Test fun `has space`() = assertEquals(ValidationError.CONTAINS_WHITESPACE, validatePassword("ab cd www"))
+    fun `too short`() = assertEquals(PasswordValidationError.TooShort, validatePassword("abc"))
+
+    @Test
+    fun `has space`() = assertEquals(
+        PasswordValidationError.Common(CommonValidationError.ContainsWhitespaces),
+        validatePassword("ab cd www")
+    )
     @Test fun `valid boundaries`() {
         assertNull(validateUsername("abcdspsd"))
     }
@@ -26,8 +39,14 @@ class PasswordValidatorTest {
 
 class EmailValidatorTest {
     @Test
-    fun `not in email format`() = assertEquals(ValidationError.INVALID_EMAIL, validateEmail("abc"))
-    @Test fun `has space`() = assertEquals(ValidationError.CONTAINS_WHITESPACE, validateEmail("ab cd"))
+    fun `not in email format`() =
+        assertEquals(EmailValidationError.InvalidEmail, validateEmail("abc"))
+
+    @Test
+    fun `has space`() = assertEquals(
+        EmailValidationError.Common(CommonValidationError.ContainsWhitespaces),
+        validateEmail("ab cd")
+    )
     @Test fun `valid boundaries`() {
         assertNull(validateEmail("abcd@gm.co"))
     }
