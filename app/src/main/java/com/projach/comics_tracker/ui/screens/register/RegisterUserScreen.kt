@@ -3,6 +3,7 @@ package com.projach.comics_tracker.ui.screens.register
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,11 +11,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +55,8 @@ fun RegisterUserScreen(viewModel: RegisterUserViewModel) {
         passwordError = uiState.value.passwordError,
         canSubmit = uiState.value.formIsValid,
         isLoading = uiState.value.isLoading,
-        onSubmit = { viewModel.onIntent(intent = RegisterUserIntent.Submit) }
+        onSubmit = { viewModel.onIntent(intent = RegisterUserIntent.Submit) },
+        onGoToLogin = { viewModel.onIntent(intent = RegisterUserIntent.NavigateToLogin) }
     )
 }
 
@@ -67,7 +73,8 @@ fun Content(
     passwordError: PasswordValidationError?,
     canSubmit: Boolean,
     isLoading: Boolean,
-    onSubmit: () -> Unit
+    onSubmit: () -> Unit,
+    onGoToLogin: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     if (isLoading) {
@@ -89,7 +96,7 @@ fun Content(
     }
 
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()){
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val minHeight = maxHeight
 
         Column(
@@ -150,6 +157,45 @@ fun Content(
                     .align(Alignment.CenterHorizontally)
             ) {
                 Text(stringResource(R.string.register_user_submit))
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
+                Text(
+                    text = stringResource(R.string.register_user_or),
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(stringResource(R.string.register_user_has_account))
+                Spacer(Modifier.width(2.dp))
+                TextButton(
+                    onClick = onGoToLogin,
+                ) {
+                    Text(stringResource(R.string.register_user_login))
+                }
             }
         }
     }

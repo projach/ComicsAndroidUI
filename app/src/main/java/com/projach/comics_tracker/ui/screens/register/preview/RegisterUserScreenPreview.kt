@@ -19,6 +19,7 @@ fun RegisterUserScreenPreview(){
         passwordError = null,
         canSubmit = false,
         isLoading = false,
-        onSubmit = {  }
+        onSubmit = { },
+        onGoToLogin = { }
     )
 }
