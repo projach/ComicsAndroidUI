@@ -15,6 +15,9 @@
     <string name="register_user_username_is_too_short">Username cannot be less than 4 characters</string>
     <string name="register_user_username_conflict">This username is already registered</string>
     <string name="register_user_password_is_too_short">Password cannot be less than 8 characters</string>
+    <string name="register_user_has_account">Already have an account?</string>
+    <string name="register_user_login">Log in</string>
+    <string name="register_user_or">OR</string>
     <string name="otp_verify_account">Verify Your Account</string>
     <string name="otp_enter_six_digit_code">Enter the 6-digit code sent to your email.</string>
     <string name="otp_resend_code">Resend code</string>
