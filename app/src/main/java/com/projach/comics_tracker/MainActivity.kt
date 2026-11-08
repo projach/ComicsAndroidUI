@@ -20,10 +20,13 @@ import androidx.navigation.compose.rememberNavController
 import com.projach.comics_tracker.core.Logger
 import com.projach.comics_tracker.ui.navigation.Screen
 import com.projach.comics_tracker.ui.navigation.navigate
-import com.projach.comics_tracker.ui.screens.otp.OtpScreen
+import com.projach.comics_tracker.ui.screens.login.LoginUserScreen
 import com.projach.comics_tracker.ui.screens.register.RegisterEffect
 import com.projach.comics_tracker.ui.screens.register.RegisterUserScreen
 import com.projach.comics_tracker.ui.screens.register.RegisterUserViewModel
+import com.projach.comics_tracker.ui.screens.verifyOtp.OtpScreen
+import com.projach.comics_tracker.ui.screens.verifyOtp.OtpViewModel
+import com.projach.comics_tracker.ui.screens.verifyOtp.VerifyOtpEffect
 import com.projach.comics_tracker.ui.theme.ComicsTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -39,7 +42,8 @@ class MainActivity : ComponentActivity() {
             ComicsTrackerTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    snackbarHost = { SnackbarHost(snackbarHostState) }) { innerPadding ->
+                    snackbarHost = { SnackbarHost(snackbarHostState) }
+                ) { innerPadding ->
                     NavHost(
                         navController = navController,
                         startDestination = Screen.RegisterUserScreen,
@@ -70,8 +74,34 @@ class MainActivity : ComponentActivity() {
                             }
                             RegisterUserScreen(viewModel)
                         }
+
                         composable<Screen.OtpScreen> {
-                            OtpScreen()
+                            val viewModel: OtpViewModel = hiltViewModel()
+
+                            LaunchedEffect(Unit) {
+                                viewModel.effect.collect { effect ->
+                                    when (effect) {
+                                        is VerifyOtpEffect.Navigate -> {
+                                            navigate(navController, effect.navigationAction)
+                                        }
+
+                                        is VerifyOtpEffect.ShowError -> {
+                                            Logger.d("MainActivity", "Showing error")
+                                            snackbarHostState.showSnackbar(
+                                                message = effect.message,
+                                                duration = SnackbarDuration.Short,
+                                                withDismissAction = true
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            OtpScreen(viewModel)
+                        }
+
+                        composable<Screen.LoginUserScreen> {
+                            LoginUserScreen()
                         }
                     }
                 }

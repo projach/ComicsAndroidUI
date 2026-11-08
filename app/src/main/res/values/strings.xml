@@ -15,4 +15,12 @@
     <string name="register_user_username_is_too_short">Username cannot be less than 4 characters</string>
     <string name="register_user_username_conflict">This username is already registered</string>
     <string name="register_user_password_is_too_short">Password cannot be less than 8 characters</string>
+    <string name="otp_verify_account">Verify Your Account</string>
+    <string name="otp_enter_six_digit_code">Enter the 6-digit code sent to your email.</string>
+    <string name="otp_resend_code">Resend code</string>
+    <string name="otp_resend_code_in">Resend code in</string>
+    <string name="otp_continue">Continue</string>
+    <string name="otp_exit_dialog_description">Do you want to exit otp verification</string>
+    <string name="otp_exit_dialog_exit">Exit</string>
+    <string name="otp_exit_dialog_stay">Stay</string>
 </resources>

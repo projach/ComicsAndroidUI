@@ -3,7 +3,11 @@ package com.projach.comics_tracker.ui.screens.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.projach.comics_tracker.core.Logger
-import com.projach.comics_tracker.domain.dataResult.DataError
+import com.projach.comics_tracker.domain.dataResult.Conflict
+import com.projach.comics_tracker.domain.dataResult.NetworkUserDataError
+import com.projach.comics_tracker.domain.dataResult.RegisterUserDataError
+import com.projach.comics_tracker.domain.dataResult.ServerUserDataError
+import com.projach.comics_tracker.domain.dataResult.TooManyRequests
 import com.projach.comics_tracker.domain.dataResult.onError
 import com.projach.comics_tracker.domain.dataResult.onSuccess
 import com.projach.comics_tracker.domain.repository.AuthRepository
@@ -13,6 +17,7 @@ import com.projach.comics_tracker.domain.validation.validatePassword
 import com.projach.comics_tracker.domain.validation.validateUsername
 import com.projach.comics_tracker.ui.navigation.NavigationAction
 import com.projach.comics_tracker.ui.navigation.Screen
+import com.projach.comics_tracker.ui.screens.register.RegisterEffect.ShowError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -78,7 +83,7 @@ class RegisterUserViewModel @Inject constructor(
         }
     }
 
-    private fun submitForm(){
+    private fun submitForm() {
         if (_uiState.value.formIsValid) {
             _uiState.update {
                 it.copy(isLoading = true)
@@ -97,7 +102,8 @@ class RegisterUserViewModel @Inject constructor(
                         RegisterEffect.Navigate(
                             NavigationAction.NavigateToAndClearBackStack(
                                 Screen.OtpScreen(
-                                    email = _uiState.value.email
+                                    email = _uiState.value.email,
+                                    username = _uiState.value.username
                                 )
                             )
                         )
@@ -111,9 +117,9 @@ class RegisterUserViewModel @Inject constructor(
         }
     }
 
-    private suspend fun handleResponseErrors(error: DataError){
+    private suspend fun handleResponseErrors(error: RegisterUserDataError) {
         when (error) {
-            is DataError.Conflict -> {
+            is Conflict -> {
                 when {
                     error.message.lowercase()
                         .contains("email") -> _uiState.update {
@@ -126,25 +132,25 @@ class RegisterUserViewModel @Inject constructor(
                     }
 
                     else -> {
-                        _effect.send(RegisterEffect.ShowError("Email or Username already exists"))
+                        _effect.send(ShowError("Email or Username already exists"))
                     }
                 }
             }
 
-            DataError.Network, DataError.NoInternet, DataError.Timeout -> _effect.send(
-                RegisterEffect.ShowError("There is a connection issue please try again")
-            )
+            ServerUserDataError.Unavailable, ServerUserDataError.Internal, NetworkUserDataError.Timeout, NetworkUserDataError.NoInternet -> _effect.send(
+                ShowError("There is a connection issue please try again")
+            ).also { Logger.e("RegisterUserViewModel", "We have error $error") }
 
-            is DataError.TooManyRequests -> _effect.send(
-                RegisterEffect.ShowError(
+            is TooManyRequests -> _effect.send(
+                ShowError(
                     "You need to wait for ${error.retryAfterRemainingSeconds} to try again with this email/username"
                 )
             )
 
-            is DataError.Unknown -> {
-                Logger.e("RegisterUserViewModel", "Unknown error in register call ${error.cause}")
+            is ServerUserDataError.Unknown -> {
+                Logger.e("RegisterUserViewModel", "Unknown error in register call ${error.code}")
                 _effect.send(
-                    RegisterEffect.ShowError(
+                    ShowError(
                         "There was an error please try again!"
                     )
                 )
