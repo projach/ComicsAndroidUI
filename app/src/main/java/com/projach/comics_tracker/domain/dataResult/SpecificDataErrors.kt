@@ -6,3 +6,4 @@ data class TooManyRequests(val retryAfterRemainingSeconds: Int?) : RegisterUserD
 
 object InvalidOrExpiredCode : VerifyOtpDataError
 object NotFound : RefreshOtpCodeDataError
+object InvalidUsernameOrPassword : LoginUserDataError

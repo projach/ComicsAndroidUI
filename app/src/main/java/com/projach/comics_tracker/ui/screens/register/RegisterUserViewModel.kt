@@ -73,7 +73,13 @@ class RegisterUserViewModel @Inject constructor(
 
             RegisterUserIntent.NavigateToLogin -> {
                 viewModelScope.launch {
-                    _effect.send(RegisterEffect.Navigate(NavigationAction.NavigateTo(Screen.LoginUserScreen())))
+                    _effect.send(
+                        RegisterEffect.Navigate(
+                            NavigationAction.NavigateToAndClearBackStack(
+                                Screen.LoginUserScreen()
+                            )
+                        )
+                    )
                 }
             }
 

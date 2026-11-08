@@ -26,4 +26,14 @@
     <string name="otp_exit_dialog_description">Do you want to exit otp verification</string>
     <string name="otp_exit_dialog_exit">Exit</string>
     <string name="otp_exit_dialog_stay">Stay</string>
+    <string name="login_user_welcome_back">Welcome Back</string>
+    <string name="login_user_log_in_to_account">Log in to your account</string>
+    <string name="login_user_username_label">Username</string>
+    <string name="login_user_username_hint">Enter your username</string>
+    <string name="login_user_password_label">Password</string>
+    <string name="login_user_password_hint">Enter your password</string>
+    <string name="login_user_log_in">Log in</string>
+    <string name="login_user_or">OR</string>
+    <string name="login_user_dont_have_account_yet">Don\'t have account yet?</string>
+    <string name="login_user_create_account">Create an account</string>
 </resources>

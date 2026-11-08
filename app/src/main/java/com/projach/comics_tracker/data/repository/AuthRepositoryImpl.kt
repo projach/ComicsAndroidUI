@@ -1,5 +1,6 @@
 package com.projach.comics_tracker.data.repository
 
+import com.projach.comics_tracker.data.model.LogInRequestDto
 import com.projach.comics_tracker.data.model.RefreshOtpResponseDto
 import com.projach.comics_tracker.data.model.ResendOtpRequestDto
 import com.projach.comics_tracker.data.model.SignUpRequestDto
@@ -10,11 +11,15 @@ import com.projach.comics_tracker.data.source.remote.safeApiCall
 import com.projach.comics_tracker.domain.dataResult.Conflict
 import com.projach.comics_tracker.domain.dataResult.DataResult
 import com.projach.comics_tracker.domain.dataResult.InvalidOrExpiredCode
+import com.projach.comics_tracker.domain.dataResult.InvalidUsernameOrPassword
+import com.projach.comics_tracker.domain.dataResult.LoginUserDataError
 import com.projach.comics_tracker.domain.dataResult.NotFound
 import com.projach.comics_tracker.domain.dataResult.RefreshOtpCodeDataError
 import com.projach.comics_tracker.domain.dataResult.RegisterUserDataError
 import com.projach.comics_tracker.domain.dataResult.TooManyRequests
 import com.projach.comics_tracker.domain.dataResult.VerifyOtpDataError
+import com.projach.comics_tracker.domain.dataResult.map
+import com.projach.comics_tracker.domain.models.LoginModel
 import com.projach.comics_tracker.domain.repository.AuthRepository
 import javax.inject.Inject
 
@@ -87,4 +92,21 @@ class AuthRepositoryImpl @Inject constructor(
                 )
             }
         )
+
+    override suspend fun login(
+        username: String,
+        password: String
+    ): DataResult<LoginModel, LoginUserDataError> =
+        safeApiCall(
+            commonError = { it },
+            httpError = { code, _, _ ->
+                when (code) {
+                    401 -> InvalidUsernameOrPassword
+                    else -> null
+                }
+            },
+            call = { authApi.loginUser(LogInRequestDto(username = username, password = password)) }
+        ).map {
+            it.toModel()
+        }
 }

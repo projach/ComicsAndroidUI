@@ -20,7 +20,10 @@ import androidx.navigation.compose.rememberNavController
 import com.projach.comics_tracker.core.Logger
 import com.projach.comics_tracker.ui.navigation.Screen
 import com.projach.comics_tracker.ui.navigation.navigate
+import com.projach.comics_tracker.ui.screens.comicsList.ComicsListScreen
+import com.projach.comics_tracker.ui.screens.login.LoginUserEffect
 import com.projach.comics_tracker.ui.screens.login.LoginUserScreen
+import com.projach.comics_tracker.ui.screens.login.LoginUserViewModel
 import com.projach.comics_tracker.ui.screens.register.RegisterEffect
 import com.projach.comics_tracker.ui.screens.register.RegisterUserScreen
 import com.projach.comics_tracker.ui.screens.register.RegisterUserViewModel
@@ -46,7 +49,7 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.RegisterUserScreen,
+                        startDestination = Screen.LoginUserScreen(""),
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable<Screen.RegisterUserScreen> {
@@ -101,7 +104,35 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable<Screen.LoginUserScreen> {
-                            LoginUserScreen()
+                            val viewModel: LoginUserViewModel = hiltViewModel()
+
+                            LaunchedEffect(Unit) {
+                                viewModel.effect.collect { effect ->
+                                    when (effect) {
+                                        is LoginUserEffect.ShowError -> {
+                                            Logger.d("MainActivity", "Showing error")
+                                            snackbarHostState.showSnackbar(
+                                                message = effect.message,
+                                                duration = SnackbarDuration.Short,
+                                                withDismissAction = true
+                                            )
+                                        }
+
+                                        is LoginUserEffect.Navigate -> {
+                                            navigate(
+                                                navController = navController,
+                                                navigationAction = effect.navigation
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            LoginUserScreen(viewModel)
+                        }
+
+                        composable<Screen.ComicsListScreen> {
+                            ComicsListScreen()
                         }
                     }
                 }
