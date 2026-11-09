@@ -80,4 +80,10 @@ dependencies {
 
     //navigation
     implementation(libs.navigation.compose)
+
+    //security
+    implementation(libs.androidx.security.crypto)
+
+    //splash screen
+    implementation(libs.androidx.core.splashscreen)
 }

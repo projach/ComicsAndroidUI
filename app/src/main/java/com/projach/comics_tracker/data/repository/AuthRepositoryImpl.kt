@@ -7,7 +7,7 @@ import com.projach.comics_tracker.data.model.SignUpRequestDto
 import com.projach.comics_tracker.data.model.UserDto
 import com.projach.comics_tracker.data.model.VerifyRequestDto
 import com.projach.comics_tracker.data.source.remote.apis.AuthApi
-import com.projach.comics_tracker.data.source.remote.safeApiCall
+import com.projach.comics_tracker.data.source.remote.mappers.safeApiCall
 import com.projach.comics_tracker.domain.dataResult.Conflict
 import com.projach.comics_tracker.domain.dataResult.DataResult
 import com.projach.comics_tracker.domain.dataResult.InvalidOrExpiredCode

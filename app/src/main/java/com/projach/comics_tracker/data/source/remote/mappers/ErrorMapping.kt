@@ -1,6 +1,6 @@
-package com.projach.comics_tracker.data.source.remote
+package com.projach.comics_tracker.data.source.remote.mappers
 
-import com.projach.comics_tracker.domain.dataResult.CommonDataUserDataError
+import com.projach.comics_tracker.domain.dataResult.CommonDataError
 import com.projach.comics_tracker.domain.dataResult.DataError
 import com.projach.comics_tracker.domain.dataResult.DataResult
 import com.projach.comics_tracker.domain.dataResult.NetworkUserDataError
@@ -13,7 +13,7 @@ import java.net.UnknownHostException
 import kotlin.coroutines.cancellation.CancellationException
 
 suspend fun <T : Any, E : DataError> safeApiCall(
-    commonError: (CommonDataUserDataError) -> E,
+    commonError: (CommonDataError) -> E,
     httpError: (code: Int, message: String, headers: Headers) -> E? = { _, _, _ -> null },
     call: suspend () -> Response<T>
 ): DataResult<T, E> {

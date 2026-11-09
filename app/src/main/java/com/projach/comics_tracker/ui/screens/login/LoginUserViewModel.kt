@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.projach.comics_tracker.core.Logger
+import com.projach.comics_tracker.data.session.SessionManager
 import com.projach.comics_tracker.domain.dataResult.InvalidUsernameOrPassword
 import com.projach.comics_tracker.domain.dataResult.NetworkUserDataError
 import com.projach.comics_tracker.domain.dataResult.ServerUserDataError
@@ -42,7 +43,8 @@ sealed interface LoginUserEffect {
 
 @HiltViewModel
 class LoginUserViewModel @Inject constructor(
-    val authRepository: AuthRepository,
+    private val authRepository: AuthRepository,
+    private val sessionManager: SessionManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUserScreenUiModel())
@@ -109,9 +111,7 @@ class LoginUserViewModel @Inject constructor(
                     username = _uiState.value.username,
                     password = _uiState.value.password
                 ).onSuccess { result ->
-                    //TODO(add check after token save when the app starts if the token is alive to bypass the login/register phase)
-                    //save token for the time it is active in secure storage
-                    //navigate to comic screen!!
+                    sessionManager.onLoggedIn(result.token)
                     _effect.send(
                         Navigate(
                             NavigationAction.NavigateToAndClearBackStack(

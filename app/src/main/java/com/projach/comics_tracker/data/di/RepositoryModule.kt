@@ -1,7 +1,9 @@
 package com.projach.comics_tracker.data.di
 
 import com.projach.comics_tracker.data.repository.AuthRepositoryImpl
+import com.projach.comics_tracker.data.repository.ComicsRepositoryImpl
 import com.projach.comics_tracker.domain.repository.AuthRepository
+import com.projach.comics_tracker.domain.repository.ComicsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -16,4 +18,10 @@ abstract class RepositoryModule {
     abstract fun bindAuthRepository(
         impl: AuthRepositoryImpl
     ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindComicsRepository(
+        impl: ComicsRepositoryImpl
+    ): ComicsRepository
 }

@@ -5,5 +5,5 @@ sealed interface RegisterUserDataError : DataError
 sealed interface VerifyOtpDataError : DataError
 sealed interface RefreshOtpCodeDataError : DataError
 sealed interface LoginUserDataError : DataError
-sealed interface CommonDataUserDataError : RegisterUserDataError, VerifyOtpDataError,
+sealed interface CommonDataError : RegisterUserDataError, VerifyOtpDataError,
     RefreshOtpCodeDataError, LoginUserDataError
