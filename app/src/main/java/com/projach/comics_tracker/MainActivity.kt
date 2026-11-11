@@ -161,6 +161,23 @@ class MainActivity : ComponentActivity() {
 
                             composable<Screen.ComicsListScreen> {
                                 val viewModel: ComicsViewModel = hiltViewModel()
+                                LaunchedEffect(Unit) {
+                                    viewModel.effect.collect { effect ->
+                                        when (effect) {
+                                            is ComicsEffect.Navigate -> {
+                                                navigate(navController, effect.navigationAction)
+                                            }
+
+                                            is ComicsEffect.ShowError -> {
+                                                snackbarHostState.showSnackbar(
+                                                    message = effect.message,
+                                                    duration = SnackbarDuration.Short,
+                                                    withDismissAction = true
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                                 ComicsScreen(viewModel)
                             }
                         }

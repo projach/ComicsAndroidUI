@@ -16,6 +16,9 @@ sealed interface Screen {
 
     @Serializable
     data class ComicsListScreen(val username: String) : Screen
+
+    @Serializable
+    object AddComicScreen : Screen
 }
 
 sealed interface NavigationAction {
