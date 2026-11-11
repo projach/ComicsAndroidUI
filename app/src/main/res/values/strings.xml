@@ -36,4 +36,12 @@
     <string name="login_user_or">OR</string>
     <string name="login_user_dont_have_account_yet">Don\'t have account yet?</string>
     <string name="login_user_create_account">Create an account</string>
+    <string name="comics_my_comics">My Comics</string>
+    <string name="comics_retry">Retry</string>
+    <string name="comics_add_comic">Add</string>
+    <string name="comics_fetch_error">There was a problem on retrieving your comics please try again!</string>
+    <string name="comics_fetch_error_title">Could\'t load your comics</string>
+    <string name="comics_fetch_error_desc">There was a connection error.</string>
+    <string name="comics_empty_title">No comics yet</string>
+    <string name="comics_empty_desc">Tap + to add your first one.</string>
 </resources>
