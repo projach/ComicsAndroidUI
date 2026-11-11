@@ -22,8 +22,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.projach.comics_tracker.core.Logger
+import com.projach.comics_tracker.ui.navigation.NavigationAction
 import com.projach.comics_tracker.ui.navigation.Screen
 import com.projach.comics_tracker.ui.navigation.navigate
+import com.projach.comics_tracker.ui.screens.comicsList.ComicsEffect
 import com.projach.comics_tracker.ui.screens.comicsList.ComicsScreen
 import com.projach.comics_tracker.ui.screens.comicsList.ComicsViewModel
 import com.projach.comics_tracker.ui.screens.login.LoginUserEffect
@@ -58,10 +60,11 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
                 LaunchedEffect(Unit) {
-                    viewModel.unauthorizedEvent.collect {
-                        navController.navigate(Screen.LoginUserScreen()) {
-                            popUpTo(navController.graph.id) { inclusive = true }
-                        }
+                    viewModel.sessionEndedEvent.collect {
+                        navigate(
+                            navController,
+                            NavigationAction.NavigateToAndClearBackStack(Screen.LoginUserScreen())
+                        )
                     }
                 }
 

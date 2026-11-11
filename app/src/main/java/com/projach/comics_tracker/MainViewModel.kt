@@ -13,11 +13,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val sessionManager: SessionManager) : ViewModel() {
+class MainViewModel @Inject constructor(
+    private val sessionManager: SessionManager
+) : ViewModel() {
     private val _startDestination = MutableStateFlow<Screen?>(null)
     val startDestination: StateFlow<Screen?> = _startDestination
 
-    val unauthorizedEvent = sessionManager.unauthorizedEvent
+    val sessionEndedEvent = sessionManager.sessionEnded
 
     init {
         viewModelScope.launch(Dispatchers.IO) {

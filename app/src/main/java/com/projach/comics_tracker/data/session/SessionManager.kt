@@ -3,15 +3,16 @@ package com.projach.comics_tracker.data.session
 import com.projach.comics_tracker.data.security.JwtUtils
 import com.projach.comics_tracker.data.security.TokenStorage
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+enum class SessionEndReason { LoggedOut, Unauthorized }
+
 @Singleton
 class SessionManager @Inject constructor(private val tokenStorage: TokenStorage) {
-    private val _unauthorized = Channel<Unit>(Channel.CONFLATED)
-    val unauthorizedEvent: Flow<Unit> = _unauthorized.receiveAsFlow()
+    private val _sessionEnded = Channel<SessionEndReason>(Channel.CONFLATED)
+    val sessionEnded = _sessionEnded.receiveAsFlow()
 
     fun isLoggedIn(): Boolean {
         val token = tokenStorage.getToken()
@@ -23,10 +24,12 @@ class SessionManager @Inject constructor(private val tokenStorage: TokenStorage)
 
     fun onLoggedIn(token: String) = tokenStorage.saveToken(token)
 
-    fun logout() = tokenStorage.clearToken()
+    fun logout() = endSession(SessionEndReason.LoggedOut)
 
-    fun onUnauthorized() {
+    fun onUnauthorized() = endSession(SessionEndReason.Unauthorized)
+
+    private fun endSession(reason: SessionEndReason) {
         tokenStorage.clearToken()
-        _unauthorized.trySend(Unit)
+        _sessionEnded.trySend(reason)
     }
 }
