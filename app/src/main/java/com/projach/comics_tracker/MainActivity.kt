@@ -25,6 +25,7 @@ import com.projach.comics_tracker.core.Logger
 import com.projach.comics_tracker.ui.navigation.NavigationAction
 import com.projach.comics_tracker.ui.navigation.Screen
 import com.projach.comics_tracker.ui.navigation.navigate
+import com.projach.comics_tracker.ui.screens.addComic.AddComicScreen
 import com.projach.comics_tracker.ui.screens.comicsList.ComicsEffect
 import com.projach.comics_tracker.ui.screens.comicsList.ComicsScreen
 import com.projach.comics_tracker.ui.screens.comicsList.ComicsViewModel
@@ -179,6 +180,10 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                                 ComicsScreen(viewModel)
+                            }
+
+                            composable<Screen.AddComicScreen> {
+                                AddComicScreen()
                             }
                         }
                     }
